@@ -18,6 +18,7 @@ def make_square(img):
 
 
 #arnold transform
+
 def arnold_transform(image,iterations=1):
     if image.shape[0] != image.shape[1]:
         '''
@@ -37,9 +38,18 @@ def arnold_transform(image,iterations=1):
         image = transformed_image.copy()
     return transformed_image
 
-def covert_to_binary(image_gray,threshold=128):  #converts a grayscale image to a binary image
-    return (image_gray>threshold).astype(np.uint8)
 
+def covert_to_binary(image_gray,threshold=128):
+    #converts a grayscale image to a binary image
+    _, binary_img = cv2.threshold(image_gray, 128, 255, cv2.THRESH_BINARY)
+    
+    return binary_img
+'''
+def covert_to_binary(image_gray,threshold=128):
+    #converts a grayscale image to a binary image
+
+    return (image_gray>threshold).astype(np.uint8)
+'''
 def block_dct2d(image, block_size=8):
     h, w = image.shape
     dct_coeffs = np.zeros_like(image, dtype=np.float32)
@@ -104,16 +114,24 @@ def watermark_embedding_process(cover_image_path,watermark_image_path,scaling_fa
     coeff_B_DCT_DWT = pywt.dwt2(B_DCT,'haar')
 
     w_size = max(W.shape)
+
     if W.shape[0] != W.shape[1]:
         print(f"WARNING: Watermark is not square ({W.shape}). Resizing to {w_size}")
         W_resized = cv2.resize(W,(w_size,w_size),interpolation=cv2.INTER_AREA)
     else:
         W_resized = W.copy()
 
+    watermarkpath = "/home/chinasa/python_projects/watermark/output/embed_watermark.png"
+    cv2.imwrite(watermarkpath, W_resized)
+
     W_scrambled = arnold_transform(W_resized,arnold_iterations)
     
     #convert the scrambled watermark to binary watermark
     W_binary = covert_to_binary(W_scrambled)
+
+    watermarkbinpath = "/home/chinasa/python_projects/watermark/output/embed_bin_watermark.png"
+    cv2.imwrite(watermarkbinpath, W_binary)
+
     h_w, w_w = W_binary.shape
 
     #dividing the watermark into three parts
@@ -159,9 +177,73 @@ def watermark_embedding_process(cover_image_path,watermark_image_path,scaling_fa
     I_R_W = block_idct2d(I_R_DCT_watermarked, block_size)
     I_R_W = np.clip(I_R_W, 0, 255).astype(np.uint8) # Clip and convert to uint8
 
-    I_G_W = G # Placeholder: no watermark embedded in G for this example
-    I_B_W = B # Placeholder: no watermark embedded in B for this example
 
+    #embed the W_G_DCT
+    h_wr, w_wr = W_G_DCT.shape #dividing into sub-blocks
+    cA_G_shape = coeff_G_DCT_DWT[0].shape
+    W_G_DCT_resized = cv2.resize(W_G_DCT, (cA_G_shape[1] * 2, cA_R_shape[0] * 2), interpolation=cv2.INTER_LINEAR)
+    mid_h, mid_w = W_G_DCT_resized.shape[0] // 2, W_G_DCT_resized.shape[1] // 2
+    W_GA = W_G_DCT_resized[0:mid_h, 0:mid_w]
+    W_GB = W_G_DCT_resized[0:mid_h, mid_w:]
+    W_GC = W_G_DCT_resized[mid_h:, 0:mid_w]
+    W_GD = W_G_DCT_resized[mid_h:, mid_w:]
+
+    cA_G, (cH_G, cV_G, cD_G) = coeff_G_DCT_DWT
+
+    # Need to resize watermark parts to match DWT band sizes
+    W_GA_resized = cv2.resize(W_GA.astype(np.float32), (cA_G.shape[1], cA_G.shape[0]), interpolation=cv2.INTER_LINEAR)
+    W_GB_resized = cv2.resize(W_GB.astype(np.float32), (cH_G.shape[1], cH_G.shape[0]), interpolation=cv2.INTER_LINEAR)
+    W_GC_resized = cv2.resize(W_GC.astype(np.float32), (cV_G.shape[1], cV_G.shape[0]), interpolation=cv2.INTER_LINEAR)
+    W_GD_resized = cv2.resize(W_GD.astype(np.float32), (cD_G.shape[1], cD_G.shape[0]), interpolation=cv2.INTER_LINEAR)
+
+    LL_G_W = cA_G + scaling_factor * W_GA_resized
+    LH_G_W = cH_G + scaling_factor * W_GB_resized
+    HL_G_W = cV_G + scaling_factor * W_GC_resized
+    HH_G_W = cD_G + scaling_factor * W_GD_resized
+
+    watermarked_coeffs_G_DCT_DWT = (LL_G_W, (LH_G_W, HL_G_W, HH_G_W))
+
+    #IDWT to watermarked DWT bands
+    I_G_DCT_watermarked = pywt.idwt2(watermarked_coeffs_G_DCT_DWT, 'haar')
+    I_G_DCT_watermarked = I_G_DCT_watermarked[:G_DCT.shape[0], :G_DCT.shape[1]]
+
+    #IDCT to obtain the watermarked 
+    I_G_W = block_idct2d(I_G_DCT_watermarked, block_size)
+    I_G_W = np.clip(I_G_W, 0, 255).astype(np.uint8) # Clip and convert to uint8
+
+    #embed the W_B_DCT
+    h_wr, w_wr = W_B_DCT.shape #dividing into sub-blocks
+    cA_B_shape = coeff_B_DCT_DWT[0].shape
+    W_B_DCT_resized = cv2.resize(W_B_DCT, (cA_B_shape[1] * 2, cA_B_shape[0] * 2), interpolation=cv2.INTER_LINEAR)
+    mid_h, mid_w = W_B_DCT_resized.shape[0] // 2, W_B_DCT_resized.shape[1] // 2
+    W_BA = W_B_DCT_resized[0:mid_h, 0:mid_w]
+    W_BB = W_B_DCT_resized[0:mid_h, mid_w:]
+    W_BC = W_B_DCT_resized[mid_h:, 0:mid_w]
+    W_BD = W_B_DCT_resized[mid_h:, mid_w:]
+
+    cA_B, (cH_B, cV_B, cD_B) = coeff_B_DCT_DWT
+
+    # Need to resize watermark parts to match DWT band sizes
+    W_BA_resized = cv2.resize(W_BA.astype(np.float32), (cA_B.shape[1], cA_B.shape[0]), interpolation=cv2.INTER_LINEAR)
+    W_BB_resized = cv2.resize(W_BB.astype(np.float32), (cH_B.shape[1], cH_B.shape[0]), interpolation=cv2.INTER_LINEAR)
+    W_BC_resized = cv2.resize(W_BC.astype(np.float32), (cV_B.shape[1], cV_B.shape[0]), interpolation=cv2.INTER_LINEAR)
+    W_BD_resized = cv2.resize(W_BD.astype(np.float32), (cD_B.shape[1], cD_B.shape[0]), interpolation=cv2.INTER_LINEAR)
+
+    LL_B_W = cA_B + scaling_factor * W_BA_resized
+    LH_B_W = cH_B + scaling_factor * W_BB_resized
+    HL_B_W = cV_B + scaling_factor * W_BC_resized
+    HH_B_W = cD_B + scaling_factor * W_BD_resized
+
+    watermarked_coeffs_B_DCT_DWT = (LL_B_W, (LH_B_W, HL_B_W, HH_B_W))
+
+    #IDWT to watermarked DWT bands
+    I_B_DCT_watermarked = pywt.idwt2(watermarked_coeffs_B_DCT_DWT, 'haar')
+    I_B_DCT_watermarked = I_B_DCT_watermarked[:B_DCT.shape[0], :B_DCT.shape[1]]
+
+    #IDCT to obtain the watermarked 
+    I_B_W = block_idct2d(I_B_DCT_watermarked, block_size)
+    I_B_W = np.clip(I_B_W, 0, 255).astype(np.uint8) # Clip and convert to uint8
+    
     I_W = cv2.merge([I_B_W, I_G_W, I_R_W]) # Merge in BGR order for OpenCV display/save
 
     return I_W
@@ -169,11 +251,11 @@ def watermark_embedding_process(cover_image_path,watermark_image_path,scaling_fa
 
 
 if __name__ == "__main__":
-    cover_image_path = "/home/chinasa/python_projects/watermark/images/sample.jpeg"
+    cover_image_path = "/home/chinasa/python_projects/watermark/images/sample.png"
     watermark_image_path = "/home/chinasa/python_projects/watermark/images/watermark.png"
 
-    scaling_factor = 0.01
-    arnold_iterations = 5
+    scaling_factor = 0.5
+    arnold_iterations = 1
 
     try:
         watermarked_image = watermark_embedding_process(
