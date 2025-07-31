@@ -122,15 +122,13 @@ def watermark_embedding_process(cover_image_path,watermark_image_path,scaling_fa
         W_resized = W.copy()
 
     watermarkpath = "/home/chinasa/python_projects/watermark/output/embed_watermark.png"
-    cv2.imwrite(watermarkpath, W_resized)
+    binary = covert_to_binary(W_resized)
+    cv2.imwrite(watermarkpath, binary)
 
     W_scrambled = arnold_transform(W_resized,arnold_iterations)
     
     #convert the scrambled watermark to binary watermark
     W_binary = covert_to_binary(W_scrambled)
-
-    watermarkbinpath = "/home/chinasa/python_projects/watermark/output/embed_bin_watermark.png"
-    cv2.imwrite(watermarkbinpath, W_binary)
 
     h_w, w_w = W_binary.shape
 
@@ -254,7 +252,7 @@ if __name__ == "__main__":
     cover_image_path = "/home/chinasa/python_projects/watermark/images/sample.png"
     watermark_image_path = "/home/chinasa/python_projects/watermark/images/watermark.png"
 
-    scaling_factor = 0.5
+    scaling_factor = 0.02
     arnold_iterations = 1
 
     try:
