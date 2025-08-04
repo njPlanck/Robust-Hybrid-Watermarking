@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import pywt
 from scipy.fftpack import dct, idct
-from watermark import block_dct2d, block_idct2d
+from watermark_embedding import block_dct2d, block_idct2d
 
 def inverse_arnold_transform(image, original_shape, iterations=1):
     if image.shape[0] != image.shape[1]:
@@ -73,10 +73,10 @@ def watermark_extraction_process(original_cover_path, watermarked_image_path, or
         recon_mid_h, recon_mid_w = original_h // 2, original_w // 2
 
         W_ext_DCT_reconstructed = np.zeros((recon_h, recon_w), dtype=np.float32)
-        W_ext_DCT_reconstructed[0:recon_mid_h, 0:recon_mid_w] = cv2.resize(extracted_W_A, (recon_mid_w, recon_mid_h), interpolation=cv2.INTER_LANCZOS4)
-        W_ext_DCT_reconstructed[0:recon_mid_h, recon_mid_w:] = cv2.resize(extracted_W_B, (recon_w - recon_mid_w, recon_mid_h), interpolation=cv2.INTER_LANCZOS4)
-        W_ext_DCT_reconstructed[recon_mid_h:, 0:recon_mid_w] = cv2.resize(extracted_W_C, (recon_mid_w, recon_h - recon_mid_h), interpolation=cv2.INTER_LANCZOS4)
-        W_ext_DCT_reconstructed[recon_mid_h:, recon_mid_w:] = cv2.resize(extracted_W_D, (recon_w - recon_mid_w, recon_h - recon_mid_h), interpolation=cv2.INTER_LANCZOS4)
+        W_ext_DCT_reconstructed[0:recon_mid_h, 0:recon_mid_w] = cv2.resize(extracted_W_A, (recon_mid_w, recon_mid_h), interpolation=cv2.INTER_LINEAR)
+        W_ext_DCT_reconstructed[0:recon_mid_h, recon_mid_w:] = cv2.resize(extracted_W_B, (recon_w - recon_mid_w, recon_mid_h), interpolation=cv2.INTER_LINEAR)
+        W_ext_DCT_reconstructed[recon_mid_h:, 0:recon_mid_w] = cv2.resize(extracted_W_C, (recon_mid_w, recon_h - recon_mid_h), interpolation=cv2.INTER_LINEAR)
+        W_ext_DCT_reconstructed[recon_mid_h:, recon_mid_w:] = cv2.resize(extracted_W_D, (recon_w - recon_mid_w, recon_h - recon_mid_h), interpolation=cv2.INTER_LINEAR)   #INTER_LANCZOS4
         
         # Invert the DCT
         W_ext = block_idct2d(W_ext_DCT_reconstructed, block_size)
@@ -95,7 +95,7 @@ def watermark_extraction_process(original_cover_path, watermarked_image_path, or
     W_norm_uint8 = W_norm.astype(np.uint8)
     
     # Use the threshold you found to be effective, e.g., 99
-    _, W_binary = cv2.threshold(W_norm_uint8, 110, 255, cv2.THRESH_BINARY)
+    _, W_binary = cv2.threshold(W_norm_uint8, 128, 255, cv2.THRESH_BINARY)
     
     # Apply inverse Arnold transform to the clean binary watermark
     extracted_watermark = inverse_arnold_transform(W_binary, original_watermark_shape, arnold_iterations)
@@ -108,8 +108,8 @@ if __name__ == "__main__":
     original_watermark_path = "/home/chinasa/python_projects/watermark/images/watermark.png"
     
     # This must be the SAME scaling factor used for embedding!
-    scaling_factor = 0.02 
-    arnold_iterations = 1 
+    scaling_factor = 0.01 
+    arnold_iterations = 3 
 
     try:
         extracted_watermark = watermark_extraction_process(
