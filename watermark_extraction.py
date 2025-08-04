@@ -104,12 +104,13 @@ def watermark_extraction_process(original_cover_path, watermarked_image_path, or
 
 if __name__ == "__main__":
     original_cover_path = "/home/chinasa/python_projects/watermark/images/sample.png"
-    watermarked_image_path = "/home/chinasa/python_projects/watermark/output/watermarked_image.png"
+    #watermarked_image_path = "/home/chinasa/python_projects/watermark/output/watermarked_image.png"
+    watermarked_image_path = "/home/chinasa/python_projects/watermark/outputs/filtered.png"
     original_watermark_path = "/home/chinasa/python_projects/watermark/images/watermark.png"
     
     # This must be the SAME scaling factor used for embedding!
-    scaling_factor = 0.01 
-    arnold_iterations = 3 
+    scaling_factor = 0.1
+    arnold_iterations = 1
 
     try:
         extracted_watermark = watermark_extraction_process(
@@ -119,7 +120,7 @@ if __name__ == "__main__":
             scaling_factor,
             arnold_iterations
         )
-        output_path = "/home/chinasa/python_projects/watermark/output/extracted_watermark.png"
+        output_path = "/home/chinasa/python_projects/watermark/output/extracted_watermark_filtered.png"
         cv2.imwrite(output_path, extracted_watermark)
         print(f"Watermark extraction complete. Extracted watermark saved to {output_path}")
 

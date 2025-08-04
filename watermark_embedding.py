@@ -252,8 +252,8 @@ if __name__ == "__main__":
     cover_image_path = "/home/chinasa/python_projects/watermark/images/sample.png"
     watermark_image_path = "/home/chinasa/python_projects/watermark/images/watermark.png"
 
-    scaling_factor = 0.01
-    arnold_iterations = 3
+    scaling_factor = 0.1
+    arnold_iterations = 1
 
     try:
         watermarked_image = watermark_embedding_process(
