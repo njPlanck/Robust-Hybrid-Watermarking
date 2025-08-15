@@ -51,6 +51,7 @@ To check the robustness of the method, seven attacks were selected namely; affin
 #### Extracted Watermarks from attacked images
 ![affine,gaussian,jpeg,noisy](image-17.png)
 L-R| affine| gaussian blur| jpeg compression| noise additon
+
 ![scaled,sheared,translated](image-18.png)
 L-R| scaled| sheared| translated
 
@@ -75,8 +76,12 @@ L-R| scaled| sheared| translated
 | sheared  | 15.64      | 0.2999  |
 | translate| 19.47      | 0.2950  |
 
+#### embedding strength of 1
+![affine,filtered,jpeg,noise](image-19.png)
+L-R| affine| gaussian blur| jpeg compression| noise additon
 
-
+![scaled,sheared,translated](image-20.png)
+L-R| scaled| sheared| translated
 
 
 
