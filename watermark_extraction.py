@@ -1,8 +1,10 @@
 import cv2
+import os
 import numpy as np
 import pywt
-from scipy.fftpack import dct, idct
+from scipy.fftpack import dct, idct, fft2, ifft2, fftshift, ifftshift
 from watermark_embedding import block_dct2d, block_idct2d
+from skimage.metrics import structural_similarity as ssim
 
 def inverse_arnold_transform(image, original_shape, iterations=1):
     if image.shape[0] != image.shape[1]:
@@ -19,6 +21,12 @@ def inverse_arnold_transform(image, original_shape, iterations=1):
         unscrambled_image = original_image
     return cv2.resize(unscrambled_image, (original_shape[1], original_shape[0]), interpolation=cv2.INTER_AREA)
 
+
+
+def smooth_watermark(img, kernel_size=5, sigma=5.0):
+    smoothed_img = cv2.GaussianBlur(img, (kernel_size, kernel_size), sigma)
+    return smoothed_img
+    
 def watermark_extraction_process(original_cover_path, watermarked_image_path, original_watermark_path, scaling_factor, arnold_iterations=1):
     # Load images
     I_O = cv2.imread(original_cover_path)
@@ -57,6 +65,8 @@ def watermark_extraction_process(original_cover_path, watermarked_image_path, or
     coeffs_G_W_DCT_DWT = pywt.dwt2(G_W_DCT, 'haar')
     coeffs_B_W_DCT_DWT = pywt.dwt2(B_W_DCT, 'haar')
 
+
+    '''
     def extract_channel_watermark(coeffs_O, coeffs_W, scaling_factor, original_watermark_shape):
         cA_O, (cH_O, cV_O, cD_O) = coeffs_O
         cA_W, (cH_W, cV_W, cD_W) = coeffs_W
@@ -81,7 +91,49 @@ def watermark_extraction_process(original_cover_path, watermarked_image_path, or
         # Invert the DCT
         W_ext = block_idct2d(W_ext_DCT_reconstructed, block_size)
         return W_ext
+   
+    '''
+    def extract_channel_watermark(coeffs_O, coeffs_W, scaling_factor, original_watermark_shape, block_size=8):
+        cA_O, (cH_O, cV_O, cD_O) = coeffs_O
+        cA_W, (cH_W, cV_W, cD_W) = coeffs_W
 
+        # Extract the watermark DCT coefficients (inverting embedding formula)
+        W_A = (cA_W - cA_O) / scaling_factor
+        W_H = (cH_W - cH_O) / scaling_factor
+        W_V = (cV_W - cV_O) / scaling_factor
+        W_D = (cD_W - cD_O) / scaling_factor
+
+        # Resize all components to original watermark size using frequency-domain alignment
+        target_h, target_w = original_watermark_shape
+        recon_h, recon_w = target_h, target_w
+        W_ext_DCT = np.zeros((recon_h, recon_w), dtype=np.float32)
+
+        # Use DCT-based resizing (frequency-domain alignment)
+        def dct_resize(block, out_shape):
+            # 1. Perform full DCT
+            block_dct = dct(dct(block.T, norm='ortho').T, norm='ortho')
+            # 2. Zero-pad or crop in frequency domain
+            h_out, w_out = out_shape
+            h_in, w_in = block_dct.shape
+            resized_dct = np.zeros((h_out, w_out), dtype=np.float32)
+            h_min = min(h_in, h_out)
+            w_min = min(w_in, w_out)
+            resized_dct[:h_min, :w_min] = block_dct[:h_min, :w_min]
+            # 3. Inverse DCT
+            resized_block = idct(idct(resized_dct.T, norm='ortho').T, norm='ortho')
+            return resized_block
+
+        mid_h, mid_w = recon_h // 2, recon_w // 2
+        W_ext_DCT[:mid_h, :mid_w] = dct_resize(W_A, (mid_h, mid_w))
+        W_ext_DCT[:mid_h, mid_w:] = dct_resize(W_H, (mid_h, recon_w - mid_w))
+        W_ext_DCT[mid_h:, :mid_w] = dct_resize(W_V, (recon_h - mid_h, mid_w))
+        W_ext_DCT[mid_h:, mid_w:] = dct_resize(W_D, (recon_h - mid_h, recon_w - mid_w))
+
+        # Invert block-wise DCT
+        W_ext = block_idct2d(W_ext_DCT, block_size)
+        return W_ext
+
+    
     # Extract watermark from each channel using the helper function
     W_R_ext = extract_channel_watermark(coeffs_R_O_DCT_DWT, coeffs_R_W_DCT_DWT, scaling_factor, original_watermark_shape)
     W_G_ext = extract_channel_watermark(coeffs_G_O_DCT_DWT, coeffs_G_W_DCT_DWT, scaling_factor, original_watermark_shape)
@@ -99,17 +151,19 @@ def watermark_extraction_process(original_cover_path, watermarked_image_path, or
     
     # Apply inverse Arnold transform to the clean binary watermark
     extracted_watermark = inverse_arnold_transform(W_binary, original_watermark_shape, arnold_iterations)
+    #extracted_watermark = smooth_watermark(extracted_watermark)
 
     return extracted_watermark
 
+'''
 if __name__ == "__main__":
     original_cover_path = "/home/chinasa/python_projects/watermark/images/sample.png"
     #watermarked_image_path = "/home/chinasa/python_projects/watermark/output/watermarked_image.png"
-    watermarked_image_path = "/home/chinasa/python_projects/watermark/outputs/filtered.png"
+    watermarked_image_path = "/home/chinasa/python_projects/watermark/outputs/scaled.png"
     original_watermark_path = "/home/chinasa/python_projects/watermark/images/watermark.png"
     
     # This must be the SAME scaling factor used for embedding!
-    scaling_factor = 0.1
+    scaling_factor = 40
     arnold_iterations = 1
 
     try:
@@ -120,7 +174,7 @@ if __name__ == "__main__":
             scaling_factor,
             arnold_iterations
         )
-        output_path = "/home/chinasa/python_projects/watermark/output/extracted_watermark_filtered.png"
+        output_path = "/home/chinasa/python_projects/watermark/output/extracted_watermark.png"
         cv2.imwrite(output_path, extracted_watermark)
         print(f"Watermark extraction complete. Extracted watermark saved to {output_path}")
 
@@ -143,3 +197,80 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"An error occurred: {e}")
         print("Please ensure your image paths and all other parameters are correct.")
+
+'''
+
+if __name__ == "__main__":
+    original_cover_path = "/home/chinasa/python_projects/watermark/images/sample.png"
+    #watermarked_image_path = "/home/chinasa/python_projects/watermark/output/watermarked_image.png"
+    watermarked_image_path = "/home/chinasa/python_projects/watermark/outputs/translated.png"
+    original_watermark_path = "/home/chinasa/python_projects/watermark/images/watermark.png"
+
+    scaling_factor = 1  # Must match embedding
+    arnold_iterations = 15
+
+    try:
+        # --- Extract watermark ---
+        extracted_watermark = watermark_extraction_process(
+            original_cover_path,
+            watermarked_image_path,
+            original_watermark_path,
+            scaling_factor,
+            arnold_iterations
+        )
+
+        output_path = "/home/chinasa/python_projects/watermark/output/extracted_watermark.png"
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        cv2.imwrite(output_path, extracted_watermark)
+        print(f"Watermark extraction complete. Extracted watermark saved to {output_path}")
+
+        # --- Load images ---
+        original_watermark = cv2.imread(original_watermark_path, cv2.IMREAD_GRAYSCALE)
+        cover = cv2.imread(original_cover_path)
+        watermarked = cv2.imread(watermarked_image_path)
+
+        # --- Debug checks ---
+        print(f"Original watermark shape: {None if original_watermark is None else original_watermark.shape}")
+        print(f"Extracted watermark shape: {None if extracted_watermark is None else extracted_watermark.shape}")
+        print(f"Cover image shape: {None if cover is None else cover.shape}")
+        print(f"Watermarked image shape: {None if watermarked is None else watermarked.shape}")
+
+        # --- Compare watermarks ---
+        if original_watermark is not None and extracted_watermark is not None:
+            extracted_resized = cv2.resize(
+                extracted_watermark,
+                (original_watermark.shape[1], original_watermark.shape[0]),
+                interpolation=cv2.INTER_AREA
+            )
+
+            # Convert both to uint8
+            extracted_resized = extracted_resized.astype(np.uint8)
+            original_watermark = original_watermark.astype(np.uint8)
+
+            psnr_wm = cv2.PSNR(original_watermark, extracted_resized)
+            ssim_wm, _ = ssim(original_watermark, extracted_resized, full=True)
+
+            print(f"[Watermark]  PSNR: {psnr_wm:.2f} dB, SSIM: {ssim_wm:.4f}")
+        else:
+            print("[Watermark] Could not compute — one of the images is missing.")
+
+        # --- Compare cover vs watermarked ---
+        if cover is not None and watermarked is not None:
+            cover = cover.astype(np.uint8)
+            watermarked = watermarked.astype(np.uint8)
+
+            if cover.shape == watermarked.shape:
+                psnr_img = cv2.PSNR(cover, watermarked)
+                ssim_img, _ = ssim(cover, watermarked, channel_axis=-1, full=True)
+                print(f"[Images]     PSNR: {psnr_img:.2f} dB, SSIM: {ssim_img:.4f}")
+            else:
+                print("[Images] Shapes do not match — resizing watermarked image.")
+                watermarked_resized = cv2.resize(watermarked, (cover.shape[1], cover.shape[0]))
+                psnr_img = cv2.PSNR(cover, watermarked_resized)
+                ssim_img, _ = ssim(cover, watermarked_resized, channel_axis=-1, full=True)
+                print(f"[Images]     PSNR: {psnr_img:.2f} dB, SSIM: {ssim_img:.4f}")
+        else:
+            print("[Images] Could not compute — one of the images is missing.")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")

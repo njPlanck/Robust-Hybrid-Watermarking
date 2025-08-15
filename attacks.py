@@ -6,7 +6,7 @@ def add_gaussian_noise(image, mean=0, std=10):
     noisy = cv2.add(image.astype(np.float32), noise)
     return np.clip(noisy, 0, 255).astype(np.uint8)
 
-def apply_filter(image, kernel_size=5):
+def apply_filter(image, kernel_size=3):
     return cv2.GaussianBlur(image, (kernel_size, kernel_size), 0)
 
 def jpeg_compression(image, quality=50):

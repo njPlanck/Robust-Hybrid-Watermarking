@@ -5,6 +5,7 @@ import pywt
 from scipy.fftpack import dct, idct
 import matplotlib.pyplot as plt
 import os
+from skimage.metrics import structural_similarity as ssim
 
 
 
@@ -247,12 +248,12 @@ def watermark_embedding_process(cover_image_path,watermark_image_path,scaling_fa
     return I_W
 
 
-
+'''
 if __name__ == "__main__":
     cover_image_path = "/home/chinasa/python_projects/watermark/images/sample.png"
     watermark_image_path = "/home/chinasa/python_projects/watermark/images/watermark.png"
 
-    scaling_factor = 0.1
+    scaling_factor = 0.01
     arnold_iterations = 1
 
     try:
@@ -271,6 +272,57 @@ if __name__ == "__main__":
         cover = cv2.imread(cover_image_path)
         watermark = cv2.imread(watermark_image_path, cv2.IMREAD_GRAYSCALE)
 
+        if cover is not None:
+            cv2.imshow("Original Cover", cover)
+        if watermark is not None:
+            cv2.imshow("Original Watermark", watermark)
+        cv2.imwrite("output_preview.png", watermarked_image)
+        print("Watermarked image saved as 'output_preview.png'")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        print("Please ensure you have OpenCV, NumPy, and PyWavelets installed (`pip install opencv-python numpy pywavelets`).")
+        print("Also, verify your image paths and the precise implementation of sub-functions.")
+
+'''
+
+if __name__ == "__main__":
+    cover_image_path = "/home/chinasa/python_projects/watermark/images/sample.png"
+    watermark_image_path = "/home/chinasa/python_projects/watermark/images/watermark.png"
+
+    scaling_factor = 1
+    arnold_iterations = 15
+
+    try:
+        watermarked_image = watermark_embedding_process(
+            cover_image_path,
+            watermark_image_path,
+            scaling_factor,
+            arnold_iterations
+        )
+
+        output_path = "/home/chinasa/python_projects/watermark/output/watermarked_image.png"
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        cv2.imwrite(output_path, watermarked_image)
+        print(f"Watermark embedding complete. Watermarked image saved to {output_path}")
+
+        # Load images for comparison
+        cover = cv2.imread(cover_image_path)
+        watermark = cv2.imread(watermark_image_path, cv2.IMREAD_GRAYSCALE)
+
+        # --- Compute PSNR ---
+        psnr_value = cv2.PSNR(cover, watermarked_image)
+
+        # --- Compute SSIM ---
+        # Convert to grayscale for SSIM
+        cover_gray = cv2.cvtColor(cover, cv2.COLOR_BGR2GRAY)
+        watermarked_gray = cv2.cvtColor(watermarked_image, cv2.COLOR_BGR2GRAY)
+        ssim_value, _ = ssim(cover_gray, watermarked_gray, full=True)
+
+        print(f"PSNR: {psnr_value:.2f} dB")
+        print(f"SSIM: {ssim_value:.4f}")
+
+        # Show preview
         if cover is not None:
             cv2.imshow("Original Cover", cover)
         if watermark is not None:
