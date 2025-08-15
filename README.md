@@ -15,6 +15,15 @@ The authors proposed a robust color image watermarking method that combines:
 * RGB channel separation and embedding
 
 ## Method Summary
+
+![process summary](image-7.png)
+
+1.
+Separate the original RGB cover image, Io, into color components of red, green and blue, 
+.
+
+2.
+Apply DCT to each color components:
 ### Cover Image Preparation:
 * The input cover image is separated into its Red, Green, and Blue components.
 *  Each channel undergoes a block-based 2D DCT.
