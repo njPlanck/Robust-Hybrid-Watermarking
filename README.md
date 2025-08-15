@@ -16,13 +16,13 @@ The authors proposed a robust color image watermarking method that combines:
 
 ## Method Summary
 ### Embedding Process
-![embedding process](image-7.png)
+![embedding process](imgs/image-7.png)
 
 #### Cover Image and Watermark/Payload
-![coverandpayload](image-6.png)
+![coverandpayload](imgs/image-6.png)
 
 #### Watermarked images with different embedding strengths 
-![watermarkedimaes](image-5.png)
+![watermarkedimaes](imgs/image-5.png)
 L-R | Strength 0.01       | Strength 0.1     | Strength 1      |
 
 | Strength | PSNR (dB) | SSIM    |
@@ -34,10 +34,10 @@ L-R | Strength 0.01       | Strength 0.1     | Strength 1      |
 As the embedding strength increased, we observed that the quality of the watermarked output degraded. It becomes more obvious that the original image has been tampered with. At embedding strength 1, periodic artifacts from the DCT blocks can visibly been seen on the watermarked image. On the other hand, strenght 0.01 provided a better quality. This is reflected in the  PSNR and SSIM values computed.  
 
 ### Extraction Process
-![extraction process](image-8.png)
+![extraction process](imgs/image-8.png)
 
 #### Embedded and Extracted Watermark
-![Embedded and Extracted Watermark](image-9.png)
+![Embedded and Extracted Watermark](imgs/image-9.png)
 L-R | Embedded Binary Image       | Extracted Binary Image    | 
 
 | PSNR (dB) | SSIM    |
@@ -49,10 +49,10 @@ L-R | Embedded Binary Image       | Extracted Binary Image    |
 To check the robustness of the method, seven attacks were selected namely; affine, filtering with gaussian blur,jpeg compression, noise addition, scaling, shearing and translation.
 
 #### Extracted Watermarks from attacked images with embedding strength 0.01
-![affine,gaussian,jpeg,noisy](image-17.png)
+![affine,gaussian,jpeg,noisy](imgs/image-17.png)
 L-R| affine| gaussian blur| jpeg compression| noise additon
 
-![scaled,sheared,translated](image-18.png)
+![scaled,sheared,translated](imgs/image-18.png)
 L-R| scaled| sheared| translated
 
 #### extracted watermarks quality of varios attacks
@@ -77,10 +77,10 @@ L-R| scaled| sheared| translated
 | translate| 19.47      | 0.2950  |
 
 #### embedding strength of 1
-![affine,filtered,jpeg,noise](image-19.png)
+![affine,filtered,jpeg,noise](imgs/image-19.png)
 L-R| affine| gaussian blur| jpeg compression| noise additon
 
-![scaled,sheared,translated](image-20.png)
+![scaled,sheared,translated](imgs/image-20.png)
 L-R| scaled| sheared| translated
 
 ### Conclusion
