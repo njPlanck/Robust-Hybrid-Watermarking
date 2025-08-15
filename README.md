@@ -20,14 +20,15 @@ The authors proposed a robust color image watermarking method that combines:
 *  Each channel undergoes a block-based 2D DCT.
 *  The DCT-transformed channel is then processed using 2D Haar DWT to obtain four frequency bands (LL, LH, HL, HH).
 #### sample cover image
-![cover](image.png)
+
 
 ### Watermark Preparation:
 * A grayscale watermark is first scrambled using the Arnold transform (to increase security).
 * The scrambled watermark is binarized and then transformed using block-based DCT.
 * The DCT coefficients of the watermark are divided into four parts.
-#### watermark or Payload
-![payload](image-1.png)
+
+#### Cover Image and watermark or Payload
+![coverandpayload](image-6.png)
 
 ### Embedding:
 * The watermark sub-parts are embedded additively into the four DWT bands (LL, LH, HL, HH) of the Red channel of the cover image.
@@ -42,13 +43,7 @@ The authors proposed a robust color image watermarking method that combines:
 | 0.1      | 28.97     | 0.8685  |
 | 1        | 17.94     | 0.3729  |
 
-#### PSNR:44.19dB,SSIM:0.9885        PSNR:28.97 dB and SSIM: 0.8685        PSNR:28.97 dB and SSIM: 0.8685
 
-### PSNR: 28.97 dB and SSIM: 0.8685
-![alt text](image-3.png)  
-
-### PSNR: 17.94 dB and SSIM: 0.3729
-![alt text](image-4.png)
 
 
 ### Reconstruction:
