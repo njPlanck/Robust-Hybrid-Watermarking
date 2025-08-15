@@ -45,6 +45,36 @@ L-R | Embedded Binary Image       | Extracted Binary Image    |
 | 8.41      | 0.0745  |
 
 
+### Extraction Process
+To check the robustness of the method, seven attacks were selected namely; affine, filtering with gaussian blur,jpeg compression, noise addition, rotation, scaling, shearing and translation.
+
+#### Extracted Watermarks from attacked images
+![affine,gaussian,jpeg,noisy](image-17.png)
+![scaled,sheared,translated](image-18.png)
+### extracted watermarks quality of varios attacks
+|Attacks   | PSNR (dB) | SSIM    |
+|----------|-----------|---------|
+| affine   | 5.81      | 0.4247  |
+| filtered | 5.23      | 0.0015  |
+| jpeg     | 5.71      | 0.0104  |
+| noise    | 6.98      | 0.0350  |
+| scaled   | 5.23      | 0.0018  |
+| sheared  | 5.80      | 0.1184  |
+| translate| 5.22      | 0.2950  |
+### watermarked image quality of before extraction
+|Attacks   | PSNR (dB)  | SSIM    |
+|----------|------------|---------|
+| affine   | 17.98      | 0.3160  |
+| filtered | 32.59      | 0.8112  |
+| jpeg     | 29.54      | 0.6409  |
+| noise    | 28.02      | 0.6603  |
+| scaled   | 16.05      | 0.3288  |
+| sheared  | 15.64      | 0.2999  |
+| translate| 19.47      | 0.2950  |
+
+
+
+
 
 
 
