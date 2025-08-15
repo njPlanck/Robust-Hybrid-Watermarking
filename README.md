@@ -46,16 +46,16 @@ L-R | Embedded Binary Image       | Extracted Binary Image    |
 
 
 ### Extraction Process
-To check the robustness of the method, seven attacks were selected namely; affine, filtering with gaussian blur,jpeg compression, noise addition, rotation, scaling, shearing and translation.
+To check the robustness of the method, seven attacks were selected namely; affine, filtering with gaussian blur,jpeg compression, noise addition, scaling, shearing and translation.
 
-#### Extracted Watermarks from attacked images
+#### Extracted Watermarks from attacked images with embedding strength 0.01
 ![affine,gaussian,jpeg,noisy](image-17.png)
 L-R| affine| gaussian blur| jpeg compression| noise additon
 
 ![scaled,sheared,translated](image-18.png)
 L-R| scaled| sheared| translated
 
-### extracted watermarks quality of varios attacks
+#### extracted watermarks quality of varios attacks
 |Attacks   | PSNR (dB) | SSIM    |
 |----------|-----------|---------|
 | affine   | 5.81      | 0.4247  |
@@ -65,7 +65,7 @@ L-R| scaled| sheared| translated
 | scaled   | 5.23      | 0.0018  |
 | sheared  | 5.80      | 0.1184  |
 | translate| 5.22      | 0.2950  |
-### watermarked image quality of before extraction
+#### watermarked image quality of before extraction
 |Attacks   | PSNR (dB)  | SSIM    |
 |----------|------------|---------|
 | affine   | 17.98      | 0.3160  |
@@ -83,6 +83,8 @@ L-R| affine| gaussian blur| jpeg compression| noise additon
 ![scaled,sheared,translated](image-20.png)
 L-R| scaled| sheared| translated
 
+### Conclusion
+From our results, it is observed that the algorithm showed mild robustness to noise addition,compression and guassian blur attacks. While an increase in the embedding strength did improve the robustness to these attacks, the quality of the watermarked image degraded and it became quite obvious that the image had been manipulated. This is consistent with the theory about the tradeoff between perceptibility and robustness. However, for  shearing, translation, scaling and affine attacks, the algorithm did not show any robustness at all. The entire extracted payload was lost. Part of the reason for this could be attributed to the nature of of these attacks. They cause distortions that tend to displace or shift some parts of the image. It can also be thought of as geometric attacks. This did not improve even when the embedding strength was increased. A special embedding and extraction process that takes accounts for these movements can be explored further to improve results from such attacks.
 
 
 
