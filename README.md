@@ -32,8 +32,17 @@ The authors proposed a robust color image watermarking method that combines:
 ### Embedding:
 * The watermark sub-parts are embedded additively into the four DWT bands (LL, LH, HL, HH) of the Red channel of the cover image.
 (Note: The Green and Blue channels are not used for embedding in the current implementation, but can be extended.)
-#### Watermarked image with strength 0.01 with PSNR: 44.19 dB and SSIM: 0.9885
+#### Watermarked images with different embedding strength 
+![watermarkedimaes](image-5.png)
+#### strength 0.01                    strength 0.1                     strength 1
+#### PSNR:44.19dB,SSIM: 0.9885        28.97 dB and SSIM: 0.8685        28.97 dB and SSIM: 0.8685
 ![watermarked001](image-2.png)
+
+### PSNR: 28.97 dB and SSIM: 0.8685
+![alt text](image-3.png)  
+
+### PSNR: 17.94 dB and SSIM: 0.3729
+![alt text](image-4.png)
 
 
 ### Reconstruction:
