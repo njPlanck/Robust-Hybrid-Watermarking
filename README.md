@@ -34,9 +34,15 @@ The authors proposed a robust color image watermarking method that combines:
 (Note: The Green and Blue channels are not used for embedding in the current implementation, but can be extended.)
 #### Watermarked images with different embedding strength 
 ![watermarkedimaes](image-5.png)
-#### strength 0.01                    strength 0.1                     strength 1
-#### PSNR:44.19dB,SSIM: 0.9885        28.97 dB and SSIM: 0.8685        28.97 dB and SSIM: 0.8685
-![watermarked001](image-2.png)
+| Strength 0.01       | Strength 0.1     | Strength 1      |
+
+| Strength | PSNR (dB) | SSIM    |
+|----------|-----------|---------|
+| 0.01     | 44.19     | 0.9885  |
+| 0.1      | 28.97     | 0.8685  |
+| 1        | 17.94     | 0.3729  |
+
+#### PSNR:44.19dB,SSIM:0.9885        PSNR:28.97 dB and SSIM: 0.8685        PSNR:28.97 dB and SSIM: 0.8685
 
 ### PSNR: 28.97 dB and SSIM: 0.8685
 ![alt text](image-3.png)  
