@@ -1,18 +1,7 @@
 # Watermark Embedding Using DWT, DCT, and Arnold Transform
-This project implements the algorithm proposed in the paper:
+This project implements the algorithm proposed in the paper: "A Novel Hybrid DCT and DWT Based Robust Watermarking Algorithm for Color Images" by Ahmed Khaleel Abdulrahman and Serkan Ozturk.
 
-"A Novel Hybrid DCT and DWT Based Robust Watermarking Algorithm for Color Images"
-by Ahmed Khaleel Abdulrahman and Serkan Ozturk.
-
-The authors proposed a robust color image watermarking method that combines:
-
-* Discrete Cosine Transform (DCT)
-
-* Discrete Wavelet Transform (DWT)
-
-* Arnold Transform for scrambling
-
-* RGB channel separation and embedding
+The authors proposed a robust color image watermarking method that combines: Discrete Cosine Transform (DCT), Discrete Wavelet Transform (DWT), Arnold Transform for scrambling, RGB channel separation and embedding.
 
 ## Method Summary
 ### Embedding Process
