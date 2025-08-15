@@ -31,7 +31,7 @@ L-R | Strength 0.01       | Strength 0.1     | Strength 1      |
 | 0.1      | 28.97     | 0.8685  |
 | 1        | 17.94     | 0.3729  |
 
-As the embedding strength increased, we observed that the quality of of the watermarked output degraded. As it become more obvious that the original image has been tampered with. At embedding strength 1, periodic artifacts from the DCT blocks can visibly been seen on the watermarked image. On the other hand, strenght 0.01 provided a better quality metrics for both PSNR and SSIM.  
+As the embedding strength increased, we observed that the quality of the watermarked output degraded. It becomes more obvious that the original image has been tampered with. At embedding strength 1, periodic artifacts from the DCT blocks can visibly been seen on the watermarked image. On the other hand, strenght 0.01 provided a better quality. This is reflected in the  PSNR and SSIM values computed.  
 
 ### Extraction Process
 ![extraction process](image-8.png)
