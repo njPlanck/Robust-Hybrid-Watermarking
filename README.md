@@ -34,7 +34,7 @@ L-R | Embedded Binary Image       | Extracted Binary Image    |
 | 8.41      | 0.0745  |
 
 
-### Extraction Process
+### Attacks
 To check the robustness of the method, seven attacks were selected namely; affine, filtering with gaussian blur,jpeg compression, noise addition, scaling, shearing and translation.
 
 #### Extracted Watermarks from attacked images with embedding strength 0.01
